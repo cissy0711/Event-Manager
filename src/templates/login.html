@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="//apis.google.com/js/platform.js?onload=start"></script>
+<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+<div class="row top-menu">
+		<div class="col-md-10"></div>
+		<div class="col-md-2 text-right">
+					</div>
+	</div>
+	<div class="row divider blue">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner main">
+		<div class="col-md-1"></div>
+		<div class="col-md-11 padding-none">
+			<h1>Events Manager</h1>
+		</div>
+	</div>
+	
+<div class="row top-menu">
+    <div class="col-md-12"></div>
+</div>
+		
+<div id="signInButton" class="col-md-2 col-md-offset-3">
+<span class="g-signin"
+  data-scope="openid email"
+  data-clientid="826373765025-20a1ukjelml5kacc62ub6epa4tmncoaf.apps.googleusercontent.com"
+  data-redirecturi="postmessage"
+  data-accesstype="offline"
+  data-cookiepolicy="single_host_origin"
+  data-callback="signInCallback"
+  data-approvalprompt="force">
+</span>
+</div>
+<div class="col-md-1"></div>
+<div class="col-md-2">
+<div class="fb-login-button" data-max-rows="1" data-size="xlarge" data-show-faces="false"
+		data-auto-logout-link = "false" scope="email" onlogin="refresh">
+</div>
+</div>
+
+<div class="row top-menu">
+    <div class="col-md-12"></div>
+</div>
+<div id="result" class="col-md-12 col-md-offset-3"></div>
+
+<script>
+function signInCallback(authResult){
+    if(authResult['code']){
+      $('#signinButton').attr('style','display: none');
+
+      $.ajax({
+         type: 'POST',
+         url:'/gconnect?state={{STATE}}',
+         processData:false,
+         data: authResult['code'],
+         contentType: 'application/octet-stream; charset=utf-8',
+         success: function(result){
+            if(result){
+               $('#result').html('Login Successful!</br>'+'</br>Redirecting...')
+               setTimeout(function() {
+                window.location.href="/";
+               },400);
+            }
+            else if(authResult['error']){
+                console.log('There was an error:'+ authResult['error']);
+            } 
+            else {
+             $('#result').html('Failed to make a server-side call.Check your configuration and console.');
+            }
+    }
+    }); } }
+
+</script>
+
+<script> 
+
+  function refresh(){
+  	location.reload();
+  }
+         	  
+  window.fbAsyncInit = function(){
+  FB.init({
+      appId : '939990902726924',
+      cookie : true,
+      xfbml : true,
+      version : 'v2.2'
+   });
+     
+  FB.getLoginStatus(function(response) {
+  	  console.log(response);
+  	  
+  	  if (response.status == 'connected') {
+  	  
+  	  	var access_token = response.authResponse.accessToken;
+        $.ajax({
+            type: 'POST',
+            url: '/fbconnect?state={{STATE}}',
+            processData : false,
+            data: access_token,
+            contentType: 'application/octet-stream;charset=utf-8',
+            success: function(result) {
+               if (result) {
+                  $('#result').html('Login Successful!</br>'+ '</br>Redirecting...')
+                  setTimeout(function() {
+                   window.location.href = "/";
+                   },400);
+               } 
+               else {
+                  $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+              }
+            } 
+          });
+  	  }
+  	  else if (response.status == 'not_authorized'){
+  	  document.getElementById('result').innerHTML = 'Please log' +'into this app.';
+  	  }
+  	  else {
+  	  document.getElementById('result').innerHTML = 'Please log' + 'into Facebook.';
+  	  }
+   });
+   
+  };
+   
+   (function(d,s,id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4&appId=939990902726924";
+      fjs.parentNode.insertBefore(js,fjs);
+      }(document,'script','facebook-jssdk'));
+      
+      
+</script>
+
+</body>
+</html>
+

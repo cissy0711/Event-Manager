@@ -1,0 +1,1 @@
+This web app enables you to manage your personal calendar in an efficient way.
